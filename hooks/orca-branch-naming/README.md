@@ -22,7 +22,7 @@ git 브랜치명과 Orca 사이드바 이름을 자동으로 정한다.
 
 ## 0. 설치 (Claude Code 플러그인)
 
-이 폴더는 `NuyHesHUB/claude-plugins` 마켓플레이스 안의 플러그인 하나다. Claude Code 안에서:
+이 폴더(`hooks/orca-branch-naming/`)는 `NuyHesHUB/claude-plugins` 마켓플레이스 안의 플러그인 하나다. Claude Code 안에서:
 
 ```
 /plugin install orca-branch-naming --marketplace NuyHesHUB/claude-plugins
