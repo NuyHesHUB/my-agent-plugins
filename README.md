@@ -17,14 +17,14 @@ hooks/<name>/    훅이 들어간 플러그인 (스킬을 같이 가질 수 있�
 Claude Code 안에서 (2.1.275+):
 
 ```
-/plugin install orca-branch-naming --marketplace NuyHesHUB/agent-plugins
-/plugin install mr-template --marketplace NuyHesHUB/agent-plugins
+/plugin install orca-branch-naming --marketplace NuyHesHUB/my-agent-plugins
+/plugin install mr-template --marketplace NuyHesHUB/my-agent-plugins
 ```
 
 터미널에서:
 
 ```bash
-claude plugin marketplace add NuyHesHUB/agent-plugins
+claude plugin marketplace add NuyHesHUB/my-agent-plugins
 claude plugin install orca-branch-naming@nuyheshub
 claude plugin install mr-template@nuyheshub
 ```
@@ -33,7 +33,7 @@ claude plugin install mr-template@nuyheshub
 
 ```json
 "extraKnownMarketplaces": {
-  "nuyheshub": { "source": { "source": "github", "repo": "NuyHesHUB/agent-plugins" }, "autoUpdate": true }
+  "nuyheshub": { "source": { "source": "github", "repo": "NuyHesHUB/my-agent-plugins" }, "autoUpdate": true }
 }
 ```
 
