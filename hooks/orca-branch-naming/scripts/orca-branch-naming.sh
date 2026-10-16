@@ -2,8 +2,11 @@
 # orca-branch-naming.sh — Claude Code UserPromptSubmit hook
 #
 # Orca 워크트리의 첫 "실제 작업" 프롬프트에서 에이전트에게 브랜치를 `<type>/<slug>` 컨벤션으로
-# 맞추라는 지시를 additionalContext 로 주입한다. 브랜치 이름의 성격에 따라 두 가지로 동작한다.
+# 맞추라는 지시를 additionalContext 로 주입한다. 브랜치 이름의 성격에 따라 세 가지로 동작한다.
 #
+#   표시 이름 동기화   — Orca 표시 이름(`orca worktree set --display-name`)이 이미
+#                       `<type>/<slug>` 형태인데 실제 git 브랜치는 아직 안 바뀐 경우.
+#                       프롬프트 내용은 무시하고 표시 이름을 브랜치에 그대로 반영한다.
 #   placeholder 모드  — Orca 랜덤 이름(razorfish 처럼 소문자 한 단어)이나 wip-* 임시 이름.
 #                       프롬프트를 보고 유형과 slug 를 새로 짓는다.
 #   named 모드        — 사용자가 일부러 지은 이름(하이픈·숫자·한글 포함 등).
@@ -59,8 +62,47 @@ sys.stdout.write(p.strip())' 2>/dev/null) || prompt=""
 [ -n "$prompt" ] || exit 0
 case "$prompt" in /*) exit 0 ;; esac
 
-# ---- 브랜치 이름 성격 판정 ----
 types='feat|fix|refactor|chore|test|docs|style|perf|ci|build'
+orca_bin="${ORCA_CLI_COMMAND:-orca}"
+set_cmd="$orca_bin worktree set --worktree active --display-name \"<새 브랜치명>\" --comment \"<작업 한 줄 요약(한국어)>\" --json"
+
+common_tail=$(cat <<TAIL
+사용자에게 한 줄로 \`브랜치: $branch → <새 브랜치명>\` 라고 알린 뒤 바로 본 작업을 진행합니다. 워크트리 디렉터리 이름은 바뀌지 않아도 정상입니다.
+
+예외:
+- 인사·감사·잡담처럼 어떤 작업도 암시하지 않을 때만 건너뜁니다. 분석·설명·정리·조사 같은 읽기 전용 탐색 요청도 "실제 작업"으로 보고 이름을 짓습니다(유형이 애매하면 chore를 기본값으로). "해당 폴더를 분석해봐" 같은 프롬프트는 건너뛰는 대상이 아닙니다.
+- 그래도 건너뛰기로 판단했다면 말없이 바로 본 작업으로 들어가지 말고, 먼저 한 줄로 "애매해서 이름은 다음 프롬프트에서 정하겠습니다" 라고 밝히세요. 이 안내는 이름이 정해질 때까지 다음 프롬프트에서 다시 나옵니다.
+- 사용자가 프롬프트에서 브랜치명을 직접 지정하면 그 이름을 씁니다(슬래시가 없으면 유형 접두어를 붙입니다).
+- 사용자가 이름 변경을 원치 않는다고 하면 \`touch "$marker"\` 를 실행해 이 워크트리에서 안내를 끕니다.
+TAIL
+)
+
+# ---- Orca 표시 이름이 이미 <type>/<slug> 컨벤션이면 그걸 우선한다 ----
+# 워크트리 생성 후 `orca worktree set --display-name "feat/phase-3"` 처럼 표시 이름만 먼저
+# 정해두고 실제 git 브랜치(랜덤 placeholder)는 아직 안 바꾼 경우. 이때는 프롬프트로 새 이름을
+# 짓지 않고, 이미 정해둔 표시 이름을 그대로 브랜치에 동기화한다.
+display_name=$("$orca_bin" worktree current --json 2>/dev/null | python3 -I -c 'import json,sys
+try:
+    d=json.load(sys.stdin)
+    print(d.get("result",{}).get("worktree",{}).get("displayName") or "")
+except Exception:
+    print("")' 2>/dev/null) || display_name=""
+
+display_typed_re="^(${types})/(.+)$"
+if [ -n "$display_name" ] && [ "$display_name" != "$branch" ] && [[ "$display_name" =~ $display_typed_re ]]; then
+  ctx=$(cat <<CTX
+[Orca 워크트리 브랜치 자동 네이밍 — 표시 이름 동기화]
+현재 워크트리는 Orca 표시 이름이 이미 \`$display_name\` (컨벤션 형식)으로 지정돼 있지만, 실제 git 브랜치는 아직 \`$branch\` 입니다. 프롬프트 내용과 무관하게 **표시 이름을 그대로 브랜치에 반영**하세요. 본 작업을 시작하기 전에 아래 명령을 실행합니다.
+   git branch -m "$display_name"
+$common_tail
+CTX
+)
+  CTX="$ctx" python3 -I -c 'import json,os,sys
+sys.stdout.write(json.dumps({"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":os.environ["CTX"]}},ensure_ascii=False))'
+  exit 0
+fi
+
+# ---- 브랜치 이름 성격 판정 ----
 placeholder_re='^(wip([-_].*)?|[a-z]{3,})$'   # wip-*, 또는 Orca 랜덤 이름(소문자 한 단어)
 typed_re="^(${types})[-_](.+)$"                # fix-login-form 처럼 유형으로 시작
 
@@ -70,19 +112,6 @@ else
   mode=named
   [ "$mode_setting" != "placeholder-only" ] || exit 0
 fi
-
-orca_bin="${ORCA_CLI_COMMAND:-orca}"
-set_cmd="$orca_bin worktree set --worktree active --display-name \"<새 브랜치명>\" --comment \"<작업 한 줄 요약(한국어)>\" --json"
-
-common_tail=$(cat <<TAIL
-사용자에게 한 줄로 \`브랜치: $branch → <새 브랜치명>\` 라고 알린 뒤 바로 본 작업을 진행합니다. 워크트리 디렉터리 이름은 바뀌지 않아도 정상입니다.
-
-예외:
-- 프롬프트가 인사·단순 질문·너무 모호해서 작업 유형을 정할 수 없으면 아무것도 하지 말고 평소처럼 답하세요. 이 안내는 이름이 정해질 때까지 다음 프롬프트에서 다시 나옵니다.
-- 사용자가 프롬프트에서 브랜치명을 직접 지정하면 그 이름을 씁니다(슬래시가 없으면 유형 접두어를 붙입니다).
-- 사용자가 이름 변경을 원치 않는다고 하면 \`touch "$marker"\` 를 실행해 이 워크트리에서 안내를 끕니다.
-TAIL
-)
 
 if [ "$mode" = placeholder ]; then
   ctx=$(cat <<CTX
