@@ -3,7 +3,7 @@
   "owner": {
     "name": "NuyHesHUB"
   },
-  "description": "NuyHesHUB의 Claude Code 플러그인 모음 (스킬·훅)",
+  "description": "NuyHesHUB의 에이전트 플러그인 모음 — Claude Code용 스킬·훅 (Codex 등 다른 에이전트 포장 예정)",
   "plugins": [
     {
       "name": "orca-branch-naming",

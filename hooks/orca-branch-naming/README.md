@@ -22,16 +22,16 @@ git 브랜치명과 Orca 사이드바 이름을 자동으로 정한다.
 
 ## 0. 설치 (Claude Code 플러그인)
 
-이 폴더(`hooks/orca-branch-naming/`)는 `NuyHesHUB/claude-plugins` 마켓플레이스 안의 플러그인 하나다. Claude Code 안에서:
+이 폴더(`hooks/orca-branch-naming/`)는 `NuyHesHUB/agent-plugins` 마켓플레이스 안의 플러그인 하나다. Claude Code 안에서:
 
 ```
-/plugin install orca-branch-naming --marketplace NuyHesHUB/claude-plugins
+/plugin install orca-branch-naming --marketplace NuyHesHUB/agent-plugins
 ```
 
 또는 터미널에서:
 
 ```bash
-claude plugin marketplace add NuyHesHUB/claude-plugins
+claude plugin marketplace add NuyHesHUB/agent-plugins
 claude plugin install orca-branch-naming@nuyheshub
 ```
 
@@ -47,7 +47,7 @@ mkdir -p ~/.local/bin && cp scripts/orca-wip-launcher ~/.local/bin/orca-wip && c
 
 ```json
 "extraKnownMarketplaces": {
-  "nuyheshub": { "source": { "source": "github", "repo": "NuyHesHUB/claude-plugins" }, "autoUpdate": true }
+  "nuyheshub": { "source": { "source": "github", "repo": "NuyHesHUB/agent-plugins" }, "autoUpdate": true }
 }
 ```
 
@@ -278,7 +278,7 @@ GitHub로 옮길 때는 디렉터리 마켓플레이스를 지우고 다시 추�
 ```bash
 claude plugin uninstall orca-branch-naming@nuyheshub
 claude plugin marketplace remove nuyheshub
-claude plugin marketplace add NuyHesHUB/claude-plugins
+claude plugin marketplace add NuyHesHUB/agent-plugins
 claude plugin install orca-branch-naming@nuyheshub
 ```
 

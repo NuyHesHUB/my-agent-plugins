@@ -1,6 +1,6 @@
-# claude-plugins
+# agent-plugins
 
-NuyHesHUB의 Claude Code 플러그인 모음. 이 저장소 하나가 마켓플레이스(`nuyheshub`)이고, 플러그인은 종류별 슬라이스 폴더 아래에 하나씩 들어 있다.
+NuyHesHUB의 에이전트 플러그인 모음. 지금은 Claude Code 포장(마켓플레이스 `nuyheshub`)이 들어 있고, 스킬 본체는 Agent Skills 규격이라 Codex 등 다른 에이전트에서도 재사용할 수 있다. 이 저장소 하나가 마켓플레이스이고, 플러그인은 종류별 슬라이스 폴더 아래에 하나씩 들어 있다.
 
 ```
 skills/<name>/   스킬만 있는 플러그인
@@ -17,14 +17,14 @@ hooks/<name>/    훅이 들어간 플러그인 (스킬을 같이 가질 수 있�
 Claude Code 안에서 (2.1.275+):
 
 ```
-/plugin install orca-branch-naming --marketplace NuyHesHUB/claude-plugins
-/plugin install mr-template --marketplace NuyHesHUB/claude-plugins
+/plugin install orca-branch-naming --marketplace NuyHesHUB/agent-plugins
+/plugin install mr-template --marketplace NuyHesHUB/agent-plugins
 ```
 
 터미널에서:
 
 ```bash
-claude plugin marketplace add NuyHesHUB/claude-plugins
+claude plugin marketplace add NuyHesHUB/agent-plugins
 claude plugin install orca-branch-naming@nuyheshub
 claude plugin install mr-template@nuyheshub
 ```
@@ -33,7 +33,7 @@ claude plugin install mr-template@nuyheshub
 
 ```json
 "extraKnownMarketplaces": {
-  "nuyheshub": { "source": { "source": "github", "repo": "NuyHesHUB/claude-plugins" }, "autoUpdate": true }
+  "nuyheshub": { "source": { "source": "github", "repo": "NuyHesHUB/agent-plugins" }, "autoUpdate": true }
 }
 ```
 
@@ -53,6 +53,6 @@ claude plugin install mr-template@nuyheshub
 ## 로컬에서 테스트
 
 ```bash
-claude plugin marketplace add /path/to/claude-plugins   # 디렉터리 마켓플레이스
+claude plugin marketplace add /path/to/agent-plugins   # 디렉터리 마켓플레이스
 claude plugin install orca-branch-naming@nuyheshub
 ```
