@@ -1,12 +1,18 @@
 {
-  "name": "orca-branch-naming",
-  "owner": { "name": "jaiden" },
-  "description": "jaiden's Claude Code plugins for Orca",
+  "name": "nuyheshub",
+  "owner": { "name": "NuyHesHUB" },
+  "description": "NuyHesHUB의 Claude Code 플러그인 모음 (스킬·훅)",
   "plugins": [
     {
       "name": "orca-branch-naming",
-      "source": "./",
-      "description": "Orca 워크트리 브랜치를 첫 프롬프트에서 <type>/<slug> 로 자동 네이밍",
+      "source": "./orca-cli",
+      "description": "Orca 워크트리 브랜치를 첫 프롬프트에서 <type>/<slug> 로 자동 네이밍하는 훅 + orca-wip (Orca 전용)",
+      "version": "0.1.0"
+    },
+    {
+      "name": "mr-template",
+      "source": "./mr-template",
+      "description": "origin 두 브랜치 차이를 분석해 운영 배포 MR 설명을 템플릿에 맞춰 생성하는 스킬",
       "version": "0.1.0"
     }
   ]

@@ -1,0 +1,17 @@
+{
+  "name": "mr-template",
+  "version": "0.1.0",
+  "description": "main과 develop 차이를 분석해 운영 배포 MR 설명을 템플릿에 맞춰 자동 생성하는 Claude Code 스킬",
+  "author": {
+    "name": "NuyHesHUB"
+  },
+  "license": "MIT",
+  "keywords": [
+    "merge-request",
+    "gitlab",
+    "git",
+    "release",
+    "skill"
+  ],
+  "repository": "https://github.com/NuyHesHUB/mr-template-skill"
+}
