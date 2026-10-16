@@ -20,6 +20,41 @@ git 브랜치명과 Orca 사이드바 이름을 자동으로 정한다.
 
 ---
 
+## 0. 설치 (Claude Code 플러그인)
+
+이 저장소 자체가 플러그인이자 마켓플레이스다. Claude Code 안에서:
+
+```
+/plugin install orca-branch-naming --marketplace <owner>/<repo>
+```
+
+또는 터미널에서:
+
+```bash
+claude plugin marketplace add <owner>/<repo>
+claude plugin install orca-branch-naming@orca-branch-naming
+```
+
+설치되면 `UserPromptSubmit` 훅과 `/orca-wip` 스킬이 자동으로 들어온다. 터미널에서 `orca-wip` 명령을 쓰려면 한 번만:
+
+```bash
+mkdir -p ~/.local/bin && cp scripts/orca-wip-launcher ~/.local/bin/orca-wip && chmod +x ~/.local/bin/orca-wip
+```
+
+(런처는 설치된 플러그인 경로를 `~/.claude/plugins/installed_plugins.json` 에서 찾아 실행하므로 플러그인이 업데이트돼도 그대로 동작한다.)
+
+자동 업데이트: `~/.claude/settings.json` 의 마켓플레이스 항목에 `autoUpdate: true` 를 두면 Claude Code 시작 시 마켓플레이스와 플러그인을 갱신한다.
+
+```json
+"extraKnownMarketplaces": {
+  "orca-branch-naming": { "source": { "source": "github", "repo": "<owner>/<repo>" }, "autoUpdate": true }
+}
+```
+
+수동 갱신: `claude plugin update orca-branch-naming@orca-branch-naming` (적용은 재시작 후).
+
+---
+
 ## 1. 사용 방법
 
 ### 1-1. 워크트리 만들기
@@ -67,7 +102,7 @@ orca-ide worktree show --worktree active --json             # displayName, comme
 | 이 워크트리만 끄기 | `touch "$(git rev-parse --git-dir)/orca-branch-naming.skip"` |
 | 처음부터 건드리지 않게 만들기 | 생성 시 이름에 `/` 를 넣는다 (`feat/행사-신청`) |
 | 수동으로 이름 짓기 | `git branch -m <type>/<slug>` + `orca-ide worktree set --worktree active --display-name <type>/<slug> --json` |
-| 완전히 제거 | `~/.claude/settings.json` 의 `hooks.UserPromptSubmit` 에서 `orca-branch-naming.sh` 항목 삭제 |
+| 완전히 제거 | `claude plugin uninstall orca-branch-naming@orca-branch-naming` |
 
 ---
 
@@ -119,7 +154,7 @@ slug 규칙 (자동 생성 시):
 
 ### 훅
 
-Claude Code의 `UserPromptSubmit` 훅 `~/.claude/hooks/orca-branch-naming.sh` 가 **매 프롬프트마다** 실행된다.
+플러그인의 `UserPromptSubmit` 훅 `scripts/orca-branch-naming.sh` 가 **매 프롬프트마다** 실행된다.
 git 명령 몇 개로 조건을 검사하고(조용히 끝날 때 약 20ms), 모두 만족할 때만 에이전트 컨텍스트에 네이밍 지시를 넣는다.
 
 동작 조건 (전부 만족해야 함):
@@ -210,31 +245,44 @@ Use kebab-case, 2-4 words, e.g. fix-login-form-validation.
 
 ---
 
-## 6. 설치 내역
+## 6. 저장소 구성과 릴리스
 
-| 파일 | 역할 |
-| --- | --- |
-| `~/.claude/hooks/orca-branch-naming.sh` | 훅 본체. 조건 판정 + 임시/지정/정규화 모드별 지시 주입 |
-| `~/.claude/settings.json` → `hooks.UserPromptSubmit` | 훅 등록 (Orca 자체 훅 항목 뒤에 추가) |
-| `~/.local/bin/orca-wip` | 시각 기반 임시 이름으로 워크트리를 만드는 헬퍼 |
-| 이 README | 규칙·사용법·Orca 설정과의 관계 |
-
-`settings.json` 에 들어간 항목:
-
-```json
-{
-  "hooks": {
-    "UserPromptSubmit": [
-      { "hooks": [ { "type": "command", "command": "<Orca 자체 훅, 그대로 둠>" } ] },
-      { "hooks": [ { "type": "command", "command": "bash ~/.claude/hooks/orca-branch-naming.sh", "timeout": 10, "statusMessage": "Orca 브랜치 네이밍 확인" } ] }
-    ]
-  }
-}
+```
+.claude-plugin/plugin.json       플러그인 매니페스트 (name, version)
+.claude-plugin/marketplace.json  이 저장소를 마켓플레이스로 쓰기 위한 목록 (version 동일하게 유지)
+hooks/hooks.json                 UserPromptSubmit → scripts/orca-branch-naming.sh
+scripts/orca-branch-naming.sh    훅 본체 (판정 + 임시/지정/정규화 모드별 지시 주입)
+scripts/orca-wip                 임시 이름 워크트리 생성 스크립트
+scripts/orca-wip-launcher        ~/.local/bin/orca-wip 로 복사해 쓰는 런처
+skills/orca-wip/SKILL.md         /orca-wip 스킬
+README.md
 ```
 
-Orca 업데이트가 `settings.json` 의 hooks 블록을 다시 쓸 수 있는지는 확인하지 못했다. 업데이트 후 동작이 멈추면 Claude Code에서 `/hooks` 로 항목이 남아 있는지 확인한다.
+새 버전 내는 순서:
 
----
+1. 스크립트/스킬 수정
+2. `.claude-plugin/plugin.json` 과 `marketplace.json` 의 `version` 을 같이 올린다 (예: 0.1.0 → 0.2.0). 버전이 같으면 업데이트로 인식되지 않는다.
+3. `claude plugin validate .` 로 검사
+4. 커밋 → GitHub push
+5. 각 PC에서 `claude plugin update orca-branch-naming@orca-branch-naming` 또는 autoUpdate 로 반영, Claude Code 재시작
+
+로컬에서 바로 테스트하려면 이 폴더를 디렉터리 마켓플레이스로 추가해 설치한다:
+
+```bash
+claude plugin marketplace add /path/to/this/repo
+claude plugin install orca-branch-naming@orca-branch-naming
+```
+
+GitHub로 옮길 때는 디렉터리 마켓플레이스를 지우고 다시 추가한다:
+
+```bash
+claude plugin uninstall orca-branch-naming@orca-branch-naming
+claude plugin marketplace remove orca-branch-naming
+claude plugin marketplace add <owner>/<repo>
+claude plugin install orca-branch-naming@orca-branch-naming
+```
+
+Orca 업데이트가 `~/.claude/settings.json` 의 hooks 블록을 다시 써도 플러그인 훅은 영향을 받지 않는다 (훅이 플러그인 안에 있음).
 
 ## 7. 직접 검증하는 법
 
@@ -253,7 +301,7 @@ orca-ide worktree rm --worktree 'branch:fix/login-form-validation' --force --jso
 훅 로직만 빠르게 확인하려면 아무 git 워크트리에서:
 
 ```bash
-printf '%s' '{"prompt":"로그인 폼 유효성 검사 버그 고쳐줘"}' | ORCA_WORKTREE_ID=x bash ~/.claude/hooks/orca-branch-naming.sh
+printf '%s' '{"prompt":"로그인 폼 유효성 검사 버그 고쳐줘"}' | ORCA_WORKTREE_ID=x bash scripts/orca-branch-naming.sh
 # 임시 이름 브랜치면 JSON 지시가, 아니면 아무것도 출력되지 않는다
 ```
 

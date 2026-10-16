@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# orca-wip launcher — 설치된 orca-branch-naming 플러그인의 scripts/orca-wip 를 찾아 실행한다.
+# 플러그인이 업데이트돼 경로가 바뀌어도 installed_plugins.json 에서 최신 경로를 읽는다.
+set -euo pipefail
+root=$(python3 -I - <<'PY' 2>/dev/null || true
+import json, os
+d = json.load(open(os.path.expanduser("~/.claude/plugins/installed_plugins.json")))
+for k, v in d.get("plugins", {}).items():
+    if k.startswith("orca-branch-naming@") and v:
+        print(v[0]["installPath"]); break
+PY
+)
+[ -n "$root" ] && [ -x "$root/scripts/orca-wip" ] || { echo "orca-wip: orca-branch-naming 플러그인이 설치돼 있지 않습니다 (/plugin install orca-branch-naming)" >&2; exit 1; }
+exec "$root/scripts/orca-wip" "$@"
