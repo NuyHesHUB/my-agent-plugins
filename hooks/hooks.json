@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/orca-branch-naming.sh\"",
+            "timeout": 10,
+            "statusMessage": "Orca 브랜치 네이밍 확인"
+          }
+        ]
+      }
+    ]
+  }
+}

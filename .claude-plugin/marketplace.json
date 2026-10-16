@@ -1,0 +1,13 @@
+{
+  "name": "orca-branch-naming",
+  "owner": { "name": "jaiden" },
+  "description": "jaiden's Claude Code plugins for Orca",
+  "plugins": [
+    {
+      "name": "orca-branch-naming",
+      "source": "./",
+      "description": "Orca 워크트리 브랜치를 첫 프롬프트에서 <type>/<slug> 로 자동 네이밍",
+      "version": "0.1.0"
+    }
+  ]
+}

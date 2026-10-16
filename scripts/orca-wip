@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# orca-wip — 이름을 아직 정할 수 없는 작업용 Orca 워크트리를 고유한 임시 이름(wip-MMDD-HHMMSS)으로 만든다.
+# 실제 브랜치명(<type>/<slug>)은 첫 프롬프트를 본 에이전트가 ~/.claude/hooks/orca-branch-naming.sh 의 안내로 정한다.
+#
+# usage: orca-wip [--agent claude|codex|...|none] [--repo <selector>] [--child] [extra `orca worktree create` args]
+#   --agent   첫 터미널에 띄울 에이전트 (기본 claude). none 이면 쉘만 연다.
+#   --repo    대상 repo 선택자 (예: name:korea-ai-school-fe). 생략 시 현재 Orca 워크트리에서 추론.
+#   --child   현재 워크트리의 자식으로 만든다 (기본은 --no-parent 독립 워크트리).
+set -euo pipefail
+
+# Linux에서 Orca 터미널 밖의 bare `orca`는 GNOME 스크린리더라서 orca-ide 를 기본으로 둔다.
+orca_bin="${ORCA_CLI_COMMAND:-orca-ide}"
+agent="claude"
+repo=""
+lineage="--no-parent"
+extra=()
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --agent) agent="${2:-}"; shift 2 ;;
+    --repo)  repo="${2:-}";  shift 2 ;;
+    --child) lineage="";     shift ;;
+    -h|--help) sed -n '2,8p' "$0"; exit 0 ;;
+    *) extra+=("$1"); shift ;;
+  esac
+done
+
+name="wip-$(date +%m%d-%H%M%S)"
+cmd=("$orca_bin" worktree create --name "$name" --activate --json)
+[ -n "$lineage" ] && cmd+=("$lineage")
+[ -n "$repo" ] && cmd+=(--repo "$repo")
+[ -n "$agent" ] && [ "$agent" != "none" ] && cmd+=(--agent "$agent")
+[ ${#extra[@]} -gt 0 ] && cmd+=("${extra[@]}")
+
+exec "${cmd[@]}"
