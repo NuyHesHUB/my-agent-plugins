@@ -1,0 +1,17 @@
+{
+  "name": "orca-checkout",
+  "version": "0.1.0",
+  "description": "Orca 워크스페이스에서 끝낸 작업을 워크트리 브랜치명 그대로 로컬 프로젝트에 체크아웃하고 워크스페이스를 삭제하는 Claude Code 스킬",
+  "author": {
+    "name": "jaiden"
+  },
+  "license": "MIT",
+  "keywords": [
+    "orca",
+    "worktree",
+    "checkout",
+    "branch",
+    "skill"
+  ],
+  "repository": "https://github.com/NuyHesHUB/my-agent-plugins"
+}

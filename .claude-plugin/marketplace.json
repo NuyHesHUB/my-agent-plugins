@@ -16,6 +16,12 @@
       "source": "./skills/mr-template",
       "description": "origin 두 브랜치 차이를 분석해 운영 배포 MR 설명을 템플릿에 맞춰 생성하는 스킬",
       "version": "0.1.0"
+    },
+    {
+      "name": "orca-checkout",
+      "source": "./skills/orca-checkout",
+      "description": "Orca 워크스페이스에서 끝낸 작업을 워크트리 브랜치명 그대로 로컬 프로젝트에 체크아웃하고 워크스페이스를 삭제하는 /orca-checkout 스킬",
+      "version": "0.1.0"
     }
   ]
 }
