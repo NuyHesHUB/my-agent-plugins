@@ -33,7 +33,38 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-[ -n "$prompt" ] || { echo "사용법: orca-task [옵션] \"작업 프롬프트\"" >&2; exit 1; }
+# 인자 없이 실행하면 대화형: repo 선택(Orca 터미널 안이면 자동 인식) → 프롬프트 입력
+if [ -z "$prompt" ] && [ -t 0 ]; then
+  has_repo=
+  for a in ${pass[@]+"${pass[@]}"}; do [ "$a" = "--repo" ] && has_repo=1; done
+  if [ -z "$has_repo" ]; then
+    # orca CLI 는 tty 가 stdin 이면 물고 있을 수 있어 /dev/null 로 끊는다
+    ctx=$(timeout 10 "$orca_bin" worktree current --json </dev/null 2>/dev/null | python3 -I -c 'import json,sys
+try:
+    print(json.load(sys.stdin)["result"]["worktree"].get("repoId") or "")
+except Exception:
+    print("")' 2>/dev/null) || ctx=""
+    if [ -z "$ctx" ]; then
+      mapfile -t repos < <(timeout 15 "$orca_bin" repo list --json </dev/null 2>/dev/null | python3 -I -c 'import json,sys
+try:
+    for r in json.load(sys.stdin)["result"]["repos"]:
+        print(r["id"]+"\t"+(r.get("displayName") or r["id"]))
+except Exception:
+    pass' 2>/dev/null)
+    if [ "${#repos[@]}" -eq 0 ]; then
+      echo "orca-task: repo 목록을 가져올 수 없습니다. --repo name:<repo> 로 지정하세요." >&2; exit 1
+    fi
+      echo "워크스페이스를 만들 repo:"
+      i=1; for r in "${repos[@]}"; do echo "  $i) ${r#*$'\t'}"; i=$((i+1)); done
+      read -r -p "번호: " sel
+      [[ "$sel" =~ ^[0-9]+$ ]] && [ "$sel" -ge 1 ] && [ "$sel" -le "${#repos[@]}" ] || { echo "orca-task: 잘못된 선택입니다" >&2; exit 1; }
+      pass+=("--repo" "id:${repos[$((sel-1))]%%$'\t'*}")
+    fi
+  fi
+  read -r -p "작업 프롬프트: " prompt
+fi
+
+[ -n "$prompt" ] || { echo "사용법: orca-task [옵션] \"작업 프롬프트\"  (인자 없이 치면 대화형)" >&2; exit 1; }
 
 types='feat|fix|refactor|chore|test|docs|style|perf|ci|build'
 
