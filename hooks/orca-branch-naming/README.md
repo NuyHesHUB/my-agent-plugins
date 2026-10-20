@@ -63,9 +63,23 @@ mkdir -p ~/.local/bin && cp scripts/orca-wip-launcher ~/.local/bin/orca-wip && c
 
 | 방법 | 브랜치/디렉터리 이름 | 첫 프롬프트 후 |
 | --- | --- | --- |
-| **Orca UI에서 이름 비우고 생성** | `razorfish`, `alewife` 같은 Orca 랜덤 단어 | 프롬프트로 유형+내용 새로 생성 |
+| **터미널에서 `orca-task "작업 프롬프트"`** | 생성 시점부터 `fix/login-form` (폴더 포함) | 훅 개입 없음 — 이미 완성형 |
+| Orca UI에서 이름 비우고 생성 | `razorfish`, `alewife` 같은 Orca 랜덤 단어 | 프롬프트로 유형+내용 새로 생성 (**폴더는 랜덤 이름 유지**) |
 | 터미널에서 `orca-wip` | `wip-1016-105442` (시각 기반) | 위와 같음 |
 | 이름을 직접 입력 (`행사-신청`) | 입력한 그대로 | **이름 유지**, 유형 접두어만 추가 → `feat/행사-신청` |
+
+**`orca-task` 는 흐름을 뒤집는다**: 프롬프트를 먼저 받아 claude(기본 haiku)로 `<type>/<slug>` 이름을 짓고,
+그 이름으로 `orca worktree create --agent claude --prompt ...` 를 호출한다. 폴더·브랜치·표시 이름이
+생성 시점부터 컨벤션을 따르는 유일한 방법이다 (폴더명은 생성 후 변경 불가). UI 생성은 훅이 안전망으로 커버한다.
+
+```bash
+orca-task "로그인 폼 버그 고쳐줘"                      # 현재 Orca 컨텍스트의 repo
+orca-task --repo name:intube-cms-fe "회원가입 폼 버그"  # repo 지정
+orca-task --agent codex "..."                           # 다른 에이전트
+orca-task --dry-run "..."                               # 이름만 미리 확인
+```
+
+터미널 설치: `cp scripts/orca-task-launcher ~/.local/bin/orca-task && chmod +x ~/.local/bin/orca-task`
 
 `orca-wip` 옵션:
 

@@ -1,6 +1,6 @@
 {
   "name": "orca-branch-naming",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Orca 워크트리의 첫 작업 프롬프트에서 브랜치를 <type>/<slug> 컨벤션으로 자동 네이밍하는 UserPromptSubmit 훅과 orca-wip 헬퍼",
   "author": { "name": "jaiden" },
   "keywords": ["orca", "worktree", "branch", "naming", "hook"]
