@@ -1,6 +1,6 @@
 {
   "name": "mr-template",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "main과 develop 차이를 분석해 운영 배포 MR 설명을 템플릿에 맞춰 자동 생성하는 Claude Code 스킬",
   "author": {
     "name": "NuyHesHUB"

@@ -16,17 +16,17 @@ Claude Code 스킬 플러그인. `origin`의 두 브랜치 차이를 계산해 �
 Claude Code 세션 안에서 한 줄로 끝난다. Claude Code 2.1.275 이상에서 동작한다.
 
 ```
-/plugin install mr-template --marketplace NuyHesHUB/mr-template-skill
+/plugin install mr-template --marketplace NuyHesHUB/my-agent-plugins
 ```
 
 터미널에서 하거나 두 단계로 나누려면 다음과 같다.
 
 ```bash
-claude plugin marketplace add NuyHesHUB/mr-template-skill
+claude plugin marketplace add NuyHesHUB/my-agent-plugins
 claude plugin install mr-template@nuyheshub
 ```
 
-세션 안에서는 `/plugin marketplace add NuyHesHUB/mr-template-skill` 다음에 `/plugin install mr-template@nuyheshub`를 입력하면 된다. 설치 범위(user / project / local)는 설치 시 선택할 수 있다.
+세션 안에서는 `/plugin marketplace add NuyHesHUB/my-agent-plugins` 다음에 `/plugin install mr-template@nuyheshub`를 입력하면 된다. 설치 범위(user / project / local)는 설치 시 선택할 수 있다.
 
 업데이트는 다음 명령으로 한다. 자동 업데이트는 `/plugin`의 Marketplaces 탭에서 켤 수 있다.
 
@@ -40,8 +40,8 @@ claude plugin update mr-template@nuyheshub
 저장소를 직접 고치면서 쓸 때는 스킬 폴더를 `~/.claude/skills`에 링크한다.
 
 ```bash
-git clone https://github.com/NuyHesHUB/mr-template-skill.git ~/projects/code/mr-template-skill
-ln -s ~/projects/code/mr-template-skill/skills/mr-template ~/.claude/skills/mr-template
+git clone https://github.com/NuyHesHUB/my-agent-plugins.git ~/projects/code/my-agent-plugins
+ln -s ~/projects/code/my-agent-plugins/skills/mr-template/skills/mr-template ~/.claude/skills/mr-template
 ```
 
 한 컴퓨터에서 방법 1과 2를 동시에 쓰면 같은 스킬이 두 번 로드되니 하나만 쓴다.
@@ -52,10 +52,10 @@ ln -s ~/projects/code/mr-template-skill/skills/mr-template ~/.claude/skills/mr-t
 
 | 이름 | 값 | 정의 위치 | 쓰이는 곳 |
 |---|---|---|---|
-| 저장소 | `NuyHesHUB/mr-template-skill` | GitHub | 마켓플레이스 등록 시 `--marketplace` 또는 `marketplace add`의 인자 |
-| 마켓플레이스 | `nuyheshub` | `.claude-plugin/marketplace.json`의 `name` | 설치 명령의 `@` 뒤. `mr-template@nuyheshub` |
-| 플러그인 | `mr-template` | `.claude-plugin/plugin.json`의 `name` | 설치·업데이트·제거 단위 |
-| 스킬 | `mr-template` | `skills/mr-template/` 폴더명 | 슬래시 명령 `/mr-template` |
+| 저장소 | `NuyHesHUB/my-agent-plugins` | GitHub | 마켓플레이스 등록 시 `--marketplace` 또는 `marketplace add`의 인자 |
+| 마켓플레이스 | `nuyheshub` | 모노레포 루트 `.claude-plugin/marketplace.json`의 `name` | 설치 명령의 `@` 뒤. `mr-template@nuyheshub` |
+| 플러그인 | `mr-template` | `skills/mr-template/.claude-plugin/plugin.json`의 `name` | 설치·업데이트·제거 단위 |
+| 스킬 | `mr-template` | `skills/mr-template/skills/mr-template/` 폴더명 | 슬래시 명령 `/mr-template` |
 
 마켓플레이스 이름은 올린 사람의 GitHub 계정이 아니라 이 카탈로그에 붙인 별칭이다. 지금은 계정과 같은 `nuyheshub`로 두었지만 `lazyhoodie`처럼 바꿔도 되고, 그러면 설치 명령은 `mr-template@lazyhoodie`가 된다. 올린 사람 정보는 `marketplace.json`의 `owner.name`에 따로 적는다. 마켓플레이스 하나에 플러그인을 여러 개 등록할 수 있으므로, 나중에 다른 플러그인을 추가해도 사용자는 같은 마켓플레이스에서 설치한다.
 
@@ -63,8 +63,8 @@ ln -s ~/projects/code/mr-template-skill/skills/mr-template ~/.claude/skills/mr-t
 
 | 할 일 | 터미널 | 세션 안 |
 |---|---|---|
-| 한 번에 설치 (2.1.275 이상) | `claude plugin install mr-template --marketplace NuyHesHUB/mr-template-skill` | `/plugin install mr-template --marketplace NuyHesHUB/mr-template-skill` |
-| 마켓플레이스 등록 | `claude plugin marketplace add NuyHesHUB/mr-template-skill` | `/plugin marketplace add NuyHesHUB/mr-template-skill` |
+| 한 번에 설치 (2.1.275 이상) | `claude plugin install mr-template --marketplace NuyHesHUB/my-agent-plugins` | `/plugin install mr-template --marketplace NuyHesHUB/my-agent-plugins` |
+| 마켓플레이스 등록 | `claude plugin marketplace add NuyHesHUB/my-agent-plugins` | `/plugin marketplace add NuyHesHUB/my-agent-plugins` |
 | 설치 | `claude plugin install mr-template@nuyheshub` | `/plugin install mr-template@nuyheshub` |
 | 설치 목록 | `claude plugin list` | `/plugin` → Installed 탭 |
 | 마켓플레이스 새로고침 | `claude plugin marketplace update nuyheshub` | `/plugin marketplace update nuyheshub` |
@@ -182,9 +182,9 @@ Claude가 수집 결과를 바탕으로 `SKILL.md`의 작성 규칙에 따라 MR
 Claude 없이 수집 결과만 보고 싶으면 스킬 폴더의 스크립트를 직접 실행한다. 아래는 방법 2로 클론한 경우의 경로다.
 
 ```bash
-bash ~/projects/code/mr-template-skill/skills/mr-template/collect.sh                 # develop → main
-bash ~/projects/code/mr-template-skill/skills/mr-template/collect.sh hotfix/login    # hotfix/login → main
-bash ~/projects/code/mr-template-skill/skills/mr-template/collect.sh develop staging # develop → staging
+bash ~/projects/code/my-agent-plugins/skills/mr-template/skills/mr-template/collect.sh                 # develop → main
+bash ~/projects/code/my-agent-plugins/skills/mr-template/skills/mr-template/collect.sh hotfix/login    # hotfix/login → main
+bash ~/projects/code/my-agent-plugins/skills/mr-template/skills/mr-template/collect.sh develop staging # develop → staging
 ```
 
 ## 수정 방법
@@ -200,18 +200,19 @@ bash ~/projects/code/mr-template-skill/skills/mr-template/collect.sh develop sta
 
 수정한 내용을 마켓플레이스 사용자에게 내보내는 절차다.
 
-1. `.claude-plugin/plugin.json`과 `.claude-plugin/marketplace.json`의 `version`을 올린다. 사용자는 버전이 바뀌어야 새 코드를 받는다.
-2. 저장소 루트에서 `claude plugin validate .`로 매니페스트를 검사한다.
+1. 이 폴더의 `.claude-plugin/plugin.json`과 모노레포 루트 `.claude-plugin/marketplace.json`의 `version`을 같이 올린다. 사용자는 버전이 바뀌어야 새 코드를 받는다.
+2. 모노레포 루트에서 `claude plugin validate .`로 매니페스트를 검사한다.
 3. 커밋하고 푸시한다.
 
 로컬에서 설치 없이 플러그인 그대로 테스트하려면 `claude --plugin-dir <저장소 경로>`로 세션을 연다.
 
 ## 파일 구성
 
+이 플러그인은 `my-agent-plugins` 모노레포(마켓플레이스 정의는 모노레포 루트 `.claude-plugin/marketplace.json`)의 `skills/mr-template/` 폴더다.
+
 ```
-mr-template-skill/
+skills/mr-template/
 ├── .claude-plugin/
-│   ├── marketplace.json       # 마켓플레이스 정의 (이 저장소가 마켓플레이스 역할)
 │   └── plugin.json            # 플러그인 메타데이터
 ├── skills/
 │   └── mr-template/

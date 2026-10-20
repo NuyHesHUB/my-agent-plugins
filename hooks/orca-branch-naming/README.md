@@ -35,10 +35,12 @@ claude plugin marketplace add NuyHesHUB/my-agent-plugins
 claude plugin install orca-branch-naming@nuyheshub
 ```
 
-설치되면 `UserPromptSubmit` 훅과 `/orca-wip` 스킬이 자동으로 들어온다. 터미널에서 `orca-wip` 명령을 쓰려면 한 번만:
+설치되면 `UserPromptSubmit` 훅과 `/orca-task`, `/orca-wip` 스킬이 자동으로 들어온다. 터미널에서 `orca-task`, `orca-wip` 명령을 쓰려면 한 번만:
 
 ```bash
-mkdir -p ~/.local/bin && cp scripts/orca-wip-launcher ~/.local/bin/orca-wip && chmod +x ~/.local/bin/orca-wip
+mkdir -p ~/.local/bin
+cp scripts/orca-task-launcher ~/.local/bin/orca-task && chmod +x ~/.local/bin/orca-task
+cp scripts/orca-wip-launcher ~/.local/bin/orca-wip && chmod +x ~/.local/bin/orca-wip
 ```
 
 (런처는 설치된 플러그인 경로를 `~/.claude/plugins/installed_plugins.json` 에서 찾아 실행하므로 플러그인이 업데이트돼도 그대로 동작한다.)
@@ -274,8 +276,11 @@ Use kebab-case, 2-4 words, e.g. fix-login-form-validation.
 (마켓플레이스 목록은 상위 저장소 루트의 .claude-plugin/marketplace.json, version 동일하게 유지)
 hooks/hooks.json                 UserPromptSubmit → scripts/orca-branch-naming.sh
 scripts/orca-branch-naming.sh    훅 본체 (판정 + 임시/지정/정규화 모드별 지시 주입)
+scripts/orca-task                프롬프트로 <type>/<slug> 이름을 먼저 짓고 워크스페이스를 만드는 스크립트
+scripts/orca-task-launcher       ~/.local/bin/orca-task 로 복사해 쓰는 런처
 scripts/orca-wip                 임시 이름 워크트리 생성 스크립트
 scripts/orca-wip-launcher        ~/.local/bin/orca-wip 로 복사해 쓰는 런처
+skills/orca-task/SKILL.md        /orca-task 스킬
 skills/orca-wip/SKILL.md         /orca-wip 스킬
 README.md
 ```

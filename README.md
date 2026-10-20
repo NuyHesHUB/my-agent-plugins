@@ -9,7 +9,7 @@ hooks/<name>/    훅이 들어간 플러그인 (스킬을 같이 가질 수 있�
 
 | 폴더 | 플러그인 | 종류 | 설명 |
 | --- | --- | --- | --- |
-| `hooks/orca-branch-naming/` | `orca-branch-naming` | 훅 + 스킬 | Orca 워크트리 브랜치를 첫 프롬프트에서 `<type>/<slug>` 로 자동 네이밍. **Orca 전용** |
+| `hooks/orca-branch-naming/` | `orca-branch-naming` | 훅 + 스킬 | Orca 워크트리 브랜치를 첫 프롬프트에서 `<type>/<slug>` 로 자동 네이밍 + `orca-task`/`orca-wip` 워크스페이스 생성 헬퍼. **Orca 전용** |
 | `skills/mr-template/` | `mr-template` | 스킬 | origin 두 브랜치 차이로 운영 배포 MR 설명 생성 |
 | `skills/orca-checkout/` | `orca-checkout` | 스킬 | Orca 워크스페이스 작업을 워크트리 브랜치명 그대로 로컬 프로젝트에 체크아웃하고, 사용자 확인 후 워크스페이스 삭제. **Orca 전용** |
 
