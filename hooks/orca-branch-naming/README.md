@@ -212,10 +212,12 @@ Advanced → "Branch name command template" 에서 생성 프롬프트를 바꿀
 훅 쪽이 먼저 바꾸면 Orca는 "auto-generated name이 아님"으로 물러나고, Orca가 먼저 바꿔도 훅 쪽 에이전트가 다시 `type/slug` 로 바꾼다.
 최종 결과는 항상 훅 쪽 이름이지만 모델 호출이 한 번 낭비되고 사이드바 이름이 잠깐 두 번 바뀐다.
 
-**실제 사고 사례 (2026-10-20):** intube-cms-fe 에서 워크트리(`auk`)를 만들자마자 둘이 경쟁했다.
-훅 경유로 에이전트가 `feat/openapi-sync-typegen` 으로 먼저 바꿨고, Orca 내장 rename 은 기억해 둔 `auk` 브랜치가
-이미 없어 실패하면서 사이드바에 **"(현재 이름 auk \*이름 바꾸기 실패)"** 가 떠서 남았다. 브랜치 자체는 정상이고
-표시만 어긋난 것이지만, 둘 다 켜 두는 한 재발할 수 있다. (한국어 UI에서는 설정 → Git → **"브랜치 자동 이름 바꾸기"** 토글.)
+**실제 사고 사례 (2026-10-20):** intube-cms-fe 워크트리(`auk`, `turbot`)에서 내장 기능이 연속 실패하며
+사이드바에 **"(현재 이름 … \*이름 바꾸기 실패)"** 가 남았다. 오류 팝업으로 확인한 근본 원인은
+`claude not found on PATH. Install Claude to use AI commit messages.` — **Orca(Windows 앱)는 이름 생성을
+claude CLI 실행으로 처리하는데, claude 가 WSL 안에만 설치돼 있으면 Windows PATH 에서 못 찾아 생성 단계부터 실패한다.**
+내장 기능을 쓰려면 Windows 쪽에도 Claude Code 를 설치해야 한다 (`irm https://claude.ai/install.ps1 | iex`).
+이 훅은 에이전트가 WSL 안에서 직접 실행하므로 이 문제가 없다. (한국어 UI 토글: 설정 → Git → **"브랜치 자동 이름 바꾸기"**.)
 
 **권장:** 이 훅을 쓰면 Orca의 Auto-rename 은 **끈다** (설정 → Git → Auto-rename branch & worktree / 브랜치 자동 이름 바꾸기 토글).
 반대로 내장 기능을 쓸 때는 이 훅을 `ORCA_BRANCH_NAMING=off` 로 끈다. **어느 쪽이든 하나만 켠다.**
@@ -349,12 +351,15 @@ printf '%s' '{"prompt":"로그인 폼 유효성 검사 버그 고쳐줘"}' | ORC
   프롬프트 기반 네이밍으로 폴백 — 어떤 경우에도 네이밍 지시 자체는 유실되지 않는다. 에이전트 지시에도
   `git branch -m` / `worktree set` 실패 시 2초 간격 재시도를 추가했다.
 
-### 2026-10-20 — Orca 내장 "브랜치 자동 이름 바꾸기"와 레이스 (운영 지침으로 해결)
+### 2026-10-20 — Orca 내장 "브랜치 자동 이름 바꾸기" 실패 원인 오진 → claude CLI 부재로 판명
 
-- **이슈:** 훅과 Orca 내장 Auto-rename 이 둘 다 켜져 있으면 첫 작업 시작 시점에 같은 브랜치를 두고 경쟁한다.
-  실제로 훅 쪽이 먼저 rename 에 성공하자 내장 기능이 실패하며 사이드바에 "이름 바꾸기 실패"가 남았다 (5-1 참고).
-- **간과한 점:** 플러그인을 만들 때 내장 기능과의 공존을 "결과는 훅이 이긴다" 정도로만 보고, 내장 기능이
-  실패 배지를 남긴다는 UX 부작용을 확인하지 않았다.
-- **지침:** 두 기능 중 **하나만 켠다.** 훅 유지 시 내장 토글 OFF, 내장 사용 시 `ORCA_BRANCH_NAMING=off`.
+- **이슈:** 사이드바의 "이름 바꾸기 실패" 배지를 처음엔 훅과 내장 기능의 rename 레이스로 진단했다.
+  그러나 훅을 끈 상태(`ORCA_BRANCH_NAMING=off`)에서 만든 워크트리(`turbot`)에서도 똑같이 실패했고,
+  오류 팝업으로 근본 원인이 확인됐다: **Orca 는 이름 생성에 Windows 쪽 claude CLI 를 실행하는데,
+  claude 가 WSL 안에만 설치돼 있어 `claude not found on PATH` 로 생성 자체가 실패** (5-1 참고).
+- **간과한 점:** 로그의 정황(레이스 타이밍)만으로 원인을 단정했다. 내장 기능을 단독으로 돌려보는
+  대조 실험과 오류 팝업 확인을 먼저 했어야 했다.
+- **지침:** 두 기능 중 **하나만 켠다** 는 운영 지침은 레이스 예방 차원에서 여전히 유효하다.
+  훅 유지 시 내장 토글 OFF, 내장 사용 시 `ORCA_BRANCH_NAMING=off` + Windows 에 Claude Code 설치 필요.
   내장 기능은 동적 `<type>/<slug>` 분류가 불가능하고(접두사 고정 + slug 단일 세그먼트, 예: Branch Prefix `orca/` → `orca/login-form`),
   표시 이름·코멘트 연동이 없다는 차이를 감안해 선택한다.
