@@ -10,5 +10,5 @@ for k, v in d.get("plugins", {}).items():
         print(v[0]["installPath"]); break
 PY
 )
-[ -n "$root" ] && [ -x "$root/scripts/orca-wip" ] || { echo "orca-wip: orca-branch-naming 플러그인이 설치돼 있지 않습니다 (/plugin install orca-branch-naming)" >&2; exit 1; }
-exec "$root/scripts/orca-wip" "$@"
+[ -n "$root" ] && [ -f "$root/scripts/orca-wip" ] || { echo "orca-wip: orca-branch-naming 플러그인이 설치돼 있지 않습니다. Claude Code 세션에서 /plugin install orca-branch-naming@nuyheshub 로 설치하세요." >&2; exit 1; }
+exec bash "$root/scripts/orca-wip" "$@"
