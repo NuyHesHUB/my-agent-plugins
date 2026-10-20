@@ -67,7 +67,7 @@ orca_bin="${ORCA_CLI_COMMAND:-orca}"
 set_cmd="$orca_bin worktree set --worktree active --display-name \"<새 브랜치명>\" --comment \"<작업 한 줄 요약(한국어)>\" --json"
 
 common_tail=$(cat <<TAIL
-사용자에게 한 줄로 \`브랜치: $branch → <새 브랜치명>\` 라고 알린 뒤 바로 본 작업을 진행합니다. 워크트리 디렉터리 이름은 바뀌지 않아도 정상입니다.
+사용자에게 한 줄로 \`브랜치: $branch → <새 브랜치명>\` 라고 알린 뒤 바로 본 작업을 진행합니다. 워크트리 디렉터리 이름은 바뀌지 않아도 정상입니다. \`git branch -m\` 이나 \`$orca_bin worktree set\` 이 실패하면(워크트리 생성 직후 Orca가 git을 점유해 잠깐 느리거나 ref 잠금이 걸릴 수 있음) 포기하지 말고 2초 간격으로 2~3회 재시도해 반드시 완료합니다.
 
 예외:
 - 인사·감사·잡담처럼 어떤 작업도 암시하지 않을 때만 건너뜁니다. 분석·설명·정리·조사 같은 읽기 전용 탐색 요청도 "실제 작업"으로 보고 이름을 짓습니다(유형이 애매하면 chore를 기본값으로). "해당 폴더를 분석해봐" 같은 프롬프트는 건너뛰는 대상이 아닙니다.
@@ -81,7 +81,10 @@ TAIL
 # 워크트리 생성 후 `orca worktree set --display-name "feat/phase-3"` 처럼 표시 이름만 먼저
 # 정해두고 실제 git 브랜치(랜덤 placeholder)는 아직 안 바꾼 경우. 이때는 프롬프트로 새 이름을
 # 짓지 않고, 이미 정해둔 표시 이름을 그대로 브랜치에 동기화한다.
-display_name=$("$orca_bin" worktree current --json 2>/dev/null | python3 -I -c 'import json,sys
+# Orca 앱이 워크트리 생성 직후 git 폴링으로 바쁘면 이 IPC 응답이 수 초~수십 초 걸릴 수 있다.
+# 훅 전체 timeout(60s) 안에서 최대 30초까지 기다리고, 그래도 안 되면 표시 이름 동기화만
+# 포기하고 프롬프트 기반 네이밍으로 폴백한다 (훅 출력이 통째로 버려지는 것을 막는다).
+display_name=$(timeout 30 "$orca_bin" worktree current --json 2>/dev/null | python3 -I -c 'import json,sys
 try:
     d=json.load(sys.stdin)
     print(d.get("result",{}).get("worktree",{}).get("displayName") or "")

@@ -9,7 +9,7 @@
       "name": "orca-branch-naming",
       "source": "./hooks/orca-branch-naming",
       "description": "Orca 워크트리 브랜치를 첫 프롬프트에서 <type>/<slug> 로 자동 네이밍하는 훅 + orca-wip (Orca 전용)",
-      "version": "0.1.1"
+      "version": "0.1.2"
     },
     {
       "name": "mr-template",
